@@ -1,21 +1,15 @@
 enum MadhabType {
-  shafi,
   hanafi,
-  maliki,
-  hanbali,
+  standard, // 👈 all others
 }
 
 extension MadhabExtension on MadhabType {
   String get displayName {
     switch (this) {
-      case MadhabType.shafi:
-        return "Shafi";
       case MadhabType.hanafi:
         return "Hanafi";
-      case MadhabType.maliki:
-        return "Maliki";
-      case MadhabType.hanbali:
-        return "Hanbali";
+      case MadhabType.standard:
+        return "Shafi / Maliki / Hanbali";
     }
   }
 
@@ -23,7 +17,7 @@ extension MadhabExtension on MadhabType {
     switch (this) {
       case MadhabType.hanafi:
         return 1;
-      default:
+      case MadhabType.standard:
         return 0;
     }
   }

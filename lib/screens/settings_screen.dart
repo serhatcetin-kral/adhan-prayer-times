@@ -3,7 +3,7 @@ import '../models/calculation_method.dart';
 import '../models/madhab_type.dart';
 import '../services/settings_service.dart';
 import 'prayer_screen.dart';
-
+import 'main_screen.dart';
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -14,7 +14,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
 
   CalculationMethod selectedMethod = CalculationMethod.mwl;
-  MadhabType selectedMadhab = MadhabType.shafi;
+  MadhabType selectedMadhab = MadhabType.standard;
 
   bool notificationsEnabled = true;
   int offset = 0;
@@ -44,9 +44,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await SettingsService.completeFirstLaunch();
 
     // 👉 Go to prayer screen
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (_) => const PrayerScreen()),
+      MaterialPageRoute(builder: (_) => const MainScreen()),
+          (route) => false,
     );
   }
 
