@@ -6,7 +6,7 @@ import 'screens/prayer_screen.dart';
 import 'screens/settings_screen.dart';
 import 'services/notification_service.dart';
 import 'services/settings_service.dart';
-
+import 'screens/main_screen.dart';
 Future<void> setupTimezone() async {
   tz.setLocalLocation(tz.local);
 }
@@ -57,7 +57,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       home: isFirstLaunch!
           ? const SettingsScreen() // 👉 first install
-          : const PrayerScreen(),  // 👉 normal app
+          :  const MainScreen(),  // 👉 normal app
     );
   }
 }
