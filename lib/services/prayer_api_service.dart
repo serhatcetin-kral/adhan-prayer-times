@@ -4,8 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class PrayerApiService {
 
-  // 🔥 MAIN API FUNCTION
-  static Future<Map<String, String>> getPrayerTimes({
+  // 🔥 MAIN API FUNCTION (WITH HIJRI)
+  static Future<Map<String, dynamic>> getPrayerTimes({
     required double latitude,
     required double longitude,
     required int method,
@@ -29,7 +29,10 @@ class PrayerApiService {
       throw Exception('Failed to load prayer times');
     }
 
-    final data = jsonDecode(response.body)['data']['timings'];
+    final json = jsonDecode(response.body)['data'];
+
+    final timings = json['timings'];
+    final hijri = json['date']['hijri'];
 
     // 🔧 FORMAT FUNCTION
     String formatTime(String time, int offset) {
@@ -46,26 +49,36 @@ class PrayerApiService {
     }
 
     final result = {
-      'Fajr': formatTime(data['Fajr'], globalOffset + fajrOffset),
-      'Sunrise': formatTime(data['Sunrise'], globalOffset),
-      'Dhuhr': formatTime(data['Dhuhr'], globalOffset),
-      'Asr': formatTime(data['Asr'], globalOffset),
-      'Maghrib': formatTime(data['Maghrib'], globalOffset + maghribOffset),
-      'Isha': formatTime(data['Isha'], globalOffset),
+      'Fajr': formatTime(timings['Fajr'], globalOffset + fajrOffset),
+      'Sunrise': formatTime(timings['Sunrise'], globalOffset),
+      'Dhuhr': formatTime(timings['Dhuhr'], globalOffset),
+      'Asr': formatTime(timings['Asr'], globalOffset),
+      'Maghrib': formatTime(timings['Maghrib'], globalOffset + maghribOffset),
+      'Isha': formatTime(timings['Isha'], globalOffset),
     };
 
-    // 💾 SAVE FOR OFFLINE
-    await savePrayerTimes(result);
+    final hijriDate =
+        "${hijri['day']} ${hijri['month']['en']} ${hijri['year']}";
 
-    return result;
+    // 💾 SAVE FOR OFFLINE
+    await savePrayerTimes(result, hijriDate);
+
+    return {
+      'timings': result,
+      'hijri': hijriDate,
+    };
   }
 
   // 💾 SAVE DATA
-  static Future<void> savePrayerTimes(Map<String, String> data) async {
+  static Future<void> savePrayerTimes(
+      Map<String, String> data,
+      String hijri,
+      ) async {
     final prefs = await SharedPreferences.getInstance();
 
     final today = DateTime.now().toIso8601String();
     await prefs.setString('prayer_times_date', today);
+    await prefs.setString('hijri_date', hijri);
 
     data.forEach((key, value) {
       prefs.setString('prayer_$key', value);
@@ -73,7 +86,7 @@ class PrayerApiService {
   }
 
   // 📥 LOAD SAVED DATA
-  static Future<Map<String, String>?> loadSavedPrayerTimes() async {
+  static Future<Map<String, dynamic>?> loadSavedPrayerTimes() async {
     final prefs = await SharedPreferences.getInstance();
 
     final savedDate = prefs.getString('prayer_times_date');
@@ -90,13 +103,20 @@ class PrayerApiService {
       return null;
     }
 
-    return {
+    final times = {
       'Fajr': prefs.getString('prayer_Fajr') ?? '--:--',
       'Sunrise': prefs.getString('prayer_Sunrise') ?? '--:--',
       'Dhuhr': prefs.getString('prayer_Dhuhr') ?? '--:--',
       'Asr': prefs.getString('prayer_Asr') ?? '--:--',
       'Maghrib': prefs.getString('prayer_Maghrib') ?? '--:--',
       'Isha': prefs.getString('prayer_Isha') ?? '--:--',
+    };
+
+    final hijri = prefs.getString('hijri_date');
+
+    return {
+      'timings': times,
+      'hijri': hijri,
     };
   }
 }

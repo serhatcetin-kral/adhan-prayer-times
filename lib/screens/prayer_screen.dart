@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../models/calculation_method.dart';
 import '../models/madhab_type.dart';
 import '../services/location_service.dart';
@@ -9,7 +8,7 @@ import '../services/prayer_api_service.dart';
 import '../services/settings_service.dart';
 import '../services/location_name_service.dart';
 import '../services/notification_service.dart';
-
+import 'package:intl/intl.dart';
 class PrayerScreen extends StatefulWidget {
   const PrayerScreen({super.key});
 
@@ -20,13 +19,15 @@ class PrayerScreen extends StatefulWidget {
 class _PrayerScreenState extends State<PrayerScreen> {
   Map<String, String>? prayerTimes;
   String? locationName;
+  String? hijriDate;
+
   bool _isLoading = true;
   bool _isOffline = false;
 
   Timer? _timer;
   String nextPrayerName = "";
   String countdown = "";
-
+  final gregorian = DateFormat.yMMMMEEEEd().format(DateTime.now());
   @override
   void initState() {
     super.initState();
@@ -44,20 +45,18 @@ class _PrayerScreenState extends State<PrayerScreen> {
   // LOAD CACHED FIRST
   // ===============================
   Future<void> _loadCachedData() async {
-    final prefs = await SettingsService.getPrefs();
+    final saved = await PrayerApiService.loadSavedPrayerTimes();
 
-    final cachedTimes = prefs.getString('cached_prayer_times');
-    final cachedLocation = prefs.getString('cached_location_name');
+    if (saved != null) {
+      final times = Map<String, String>.from(saved['timings']);
 
-    if (cachedTimes != null) {
-      final decoded = Map<String, String>.from(jsonDecode(cachedTimes));
       setState(() {
-        prayerTimes = decoded;
-        locationName = cachedLocation;
+        prayerTimes = times;
+        hijriDate = saved['hijri'];
         _isLoading = false;
       });
 
-      _startTimer(decoded);
+      _startTimer(times);
     }
   }
 
@@ -69,7 +68,8 @@ class _PrayerScreenState extends State<PrayerScreen> {
       final method = await SettingsService.getCalculationMethod();
       final madhab = await SettingsService.getMadhab();
       final offset = await SettingsService.getOffset();
-      final notificationsEnabled = await SettingsService.getNotificationsEnabled();
+      final notificationsEnabled =
+      await SettingsService.getNotificationsEnabled();
 
       final pos = await LocationService.getUserLocation();
 
@@ -78,13 +78,16 @@ class _PrayerScreenState extends State<PrayerScreen> {
         pos.longitude,
       );
 
-      final times = await PrayerApiService.getPrayerTimes(
+      final response = await PrayerApiService.getPrayerTimes(
         latitude: pos.latitude,
         longitude: pos.longitude,
         method: method.methodId,
         school: madhab.schoolId,
         globalOffset: offset,
       );
+
+      final times = Map<String, String>.from(response['timings']);
+      final hijri = response['hijri'];
 
       if (notificationsEnabled) {
         await NotificationService.scheduleAllPrayerNotifications(times);
@@ -99,6 +102,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
       setState(() {
         locationName = name;
         prayerTimes = times;
+        hijriDate = hijri;
         _isLoading = false;
         _isOffline = false;
       });
@@ -118,15 +122,13 @@ class _PrayerScreenState extends State<PrayerScreen> {
   }
 
   // ===============================
-  // TIMER (NEXT PRAYER ONLY)
+  // TIMER
   // ===============================
   void _startTimer(Map<String, String> times) {
     _timer?.cancel();
 
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       final now = DateTime.now();
-
-      // ❗ DO NOT include Sunrise here
       final sequence = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 
       for (final name in sequence) {
@@ -144,7 +146,6 @@ class _PrayerScreenState extends State<PrayerScreen> {
         }
       }
 
-      // next day fallback
       final fajr = _parseTime(times['Fajr']!).add(const Duration(days: 1));
       final diff = fajr.difference(now);
 
@@ -179,8 +180,6 @@ class _PrayerScreenState extends State<PrayerScreen> {
   // ===============================
   @override
   Widget build(BuildContext context) {
-    final hijri = DateFormat.yMMMMEEEEd().format(DateTime.now());
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Prayer Times"),
@@ -190,20 +189,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
         children: [
-
-          // 🌙 Ramadan Banner
-          // if (isRamadan())
-          //   Container(
-          //     margin: const EdgeInsets.all(12),
-          //     padding: const EdgeInsets.all(10),
-          //     decoration: BoxDecoration(
-          //       color: Colors.green.withOpacity(0.2),
-          //       borderRadius: BorderRadius.circular(12),
-          //     ),
-          //     child: const Text("🌙 Ramadan Mubarak"),
-          //   ),
-
-          // 🔴 OFFLINE BANNER
+          // 🔴 OFFLINE
           if (_isOffline)
             Container(
               padding: const EdgeInsets.all(8),
@@ -216,13 +202,28 @@ class _PrayerScreenState extends State<PrayerScreen> {
               ),
             ),
 
-          // 📍 Location
+          // 📍 LOCATION
           Text(
-            locationName ?? (_isOffline ? "Offline Mode" : "Locating..."),
+            locationName ??
+                (_isOffline ? "Offline Mode" : "Locating..."),
           ),
 
-          // 📅 Hijri
-          Text(hijri),
+          // 📅 HIJRI DATE
+          Column(
+            children: [
+              Text(
+                gregorian,
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+              Text(
+                hijriDate != null ? "🌙 $hijriDate AH" : "",
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
 
           const SizedBox(height: 10),
 
@@ -237,7 +238,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
 
           const SizedBox(height: 10),
 
-          // 📋 LIST
+          // 📋 PRAYER LIST
           Expanded(
             child: ListView(
               children: prayerTimes!.entries.map((e) {
