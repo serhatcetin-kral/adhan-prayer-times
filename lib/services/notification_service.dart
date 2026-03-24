@@ -1,29 +1,29 @@
 import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
-
-import 'settings_service.dart'; // ✅ IMPORTANT
+import 'package:timezone/data/latest_all.dart' as tz_data;
+import 'package:intl/intl.dart';
 
 class NotificationService {
-  static final FlutterLocalNotificationsPlugin
-  flutterLocalNotificationsPlugin =
+  static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
   FlutterLocalNotificationsPlugin();
 
   // ============================
   // INIT
   // ============================
   static Future<void> init() async {
-    const AndroidInitializationSettings androidSettings =
+    tz_data.initializeTimeZones();
+
+    const androidSettings =
     AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const DarwinInitializationSettings iosSettings =
-    DarwinInitializationSettings(
+    const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestSoundPermission: true,
       requestBadgePermission: true,
     );
 
-    const InitializationSettings settings = InitializationSettings(
+    const settings = InitializationSettings(
       android: androidSettings,
       iOS: iosSettings,
     );
@@ -52,83 +52,98 @@ class NotificationService {
   }
 
   // ============================
-  // SCHEDULE ALL PRAYERS
+  // 🔥 MAIN SCHEDULER (FIXED)
   // ============================
   static Future<void> scheduleAllPrayerNotifications(
       Map<String, String> times) async {
+    await flutterLocalNotificationsPlugin.cancelAll(); // 🔥 IMPORTANT
 
-    await flutterLocalNotificationsPlugin.cancelAll();
+    final now = DateTime.now();
 
-    for (final entry in times.entries) {
-      final name = entry.key;
-      final time = entry.value;
+    final prayerNames = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 
-      // 🔥 LOAD USER SETTINGS
-      final adhanEnabled =
-      await SettingsService.isAdhanEnabled(name);
-      final popupEnabled =
-      await SettingsService.isPopupEnabled(name);
+    int id = 0;
 
-      // ❌ SKIP if both OFF
-      if (!adhanEnabled && !popupEnabled) continue;
+    for (final name in prayerNames) {
+      if (!times.containsKey(name)) continue;
 
-      final parts = time.split(':');
-      final hour = int.parse(parts[0]);
-      final minute = int.parse(parts[1]);
+      final parsed = DateFormat("HH:mm").parse(times[name]!);
 
-      final scheduled = tz.TZDateTime(
-        tz.local,
-        DateTime.now().year,
-        DateTime.now().month,
-        DateTime.now().day,
-        hour,
-        minute,
+      var scheduleDate = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        parsed.hour,
+        parsed.minute,
       );
 
+      // 🔥 FIX: move to tomorrow if passed
+      if (scheduleDate.isBefore(now)) {
+        scheduleDate = scheduleDate.add(const Duration(days: 1));
+      }
+
+      final scheduled = tz.TZDateTime.from(scheduleDate, tz.local);
+
+      print("Scheduling $name at $scheduled");
+
       await flutterLocalNotificationsPlugin.zonedSchedule(
-        name.hashCode,
-
-        // 🔔 TITLE
-        popupEnabled
-            ? (name == "Sunrise" ? "Sunrise" : "Prayer Time")
-            : null,
-
-        // 🔔 BODY
-        popupEnabled ? "$name time" : null,
+        id++,
+        'Prayer Time: $name',
+        'It is time for $name',
 
         scheduled,
 
-        NotificationDetails(
+        const NotificationDetails(
           android: AndroidNotificationDetails(
             'prayer_channel',
             'Prayer Times',
+            channelDescription: 'Prayer alerts',
             importance: Importance.max,
             priority: Priority.high,
-
-            sound: adhanEnabled && name != "Sunrise"
-                ? const RawResourceAndroidNotificationSound('adhan')
-                : null,
-
-            playSound: adhanEnabled && name != "Sunrise",
+            playSound: true,
           ),
-
           iOS: DarwinNotificationDetails(
-            presentSound: adhanEnabled && name != "Sunrise",
-            sound: adhanEnabled && name != "Sunrise"
-                ? 'adhan.caf'
-                : null,
+            presentAlert: true,
+            presentSound: true,
           ),
         ),
 
-        androidScheduleMode:
-        AndroidScheduleMode.exactAllowWhileIdle,
-
-        // 🔁 DAILY REPEAT
-        matchDateTimeComponents: DateTimeComponents.time,
-
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.absoluteTime,
+
+        // 🔥 DAILY repeat
+        matchDateTimeComponents: DateTimeComponents.time,
       );
     }
+
+    print("✅ Notifications scheduled correctly");
+  }
+
+  // ============================
+  // TEST
+  // ============================
+  static Future<void> testZonedNotification() async {
+    final scheduled =
+    tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5));
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      999,
+      'Test Notification',
+      'If you see this → notifications are FIXED',
+      scheduled,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'prayer_channel',
+          'Prayer Times',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+      UILocalNotificationDateInterpretation.absoluteTime,
+    );
   }
 }

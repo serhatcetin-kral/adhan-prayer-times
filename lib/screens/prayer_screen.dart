@@ -184,7 +184,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Prayer Times"),
+        title: const Text("Settings"),
         centerTitle: true,
       ),
       body: _isLoading
@@ -204,11 +204,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
               ),
             ),
 
-          // 📍 LOCATION
-          Text(
-            locationName ??
-                (_isOffline ? "Offline Mode" : "Locating..."),
-          ),
+
 
           // 📅 HIJRI DATE
           Column(
@@ -233,8 +229,39 @@ class _PrayerScreenState extends State<PrayerScreen> {
           if (nextPrayerName.isNotEmpty)
             Column(
               children: [
-                Text("NEXT: $nextPrayerName"),
-                Text(countdown),
+                Container(
+                  margin: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.teal,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        "Next Prayer",
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        nextPrayerName,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        countdown,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
 
@@ -243,10 +270,44 @@ class _PrayerScreenState extends State<PrayerScreen> {
           // 📋 PRAYER LIST
           Expanded(
             child: ListView(
+              padding: const EdgeInsets.all(12),
               children: prayerTimes!.entries.map((e) {
-                return ListTile(
-                  title: Text(e.key),
-                  trailing: Text(e.value),
+                final isNext = e.key == nextPrayerName;
+
+                return Container(
+                  margin: const EdgeInsets.symmetric(vertical: 6),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isNext ? Colors.teal : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      )
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        e.key,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isNext ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      Text(
+                        e.value,
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: isNext ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               }).toList(),
             ),
