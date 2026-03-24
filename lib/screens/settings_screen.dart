@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/calculation_method.dart';
 import '../models/madhab_type.dart';
 import '../services/settings_service.dart';
-import 'prayer_screen.dart';
 import 'main_screen.dart';
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -13,11 +13,18 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
 
-  CalculationMethod selectedMethod = CalculationMethod.mwl;
+  CalculationMethod selectedMethod = CalculationMethod.isna;
   MadhabType selectedMadhab = MadhabType.standard;
 
   bool notificationsEnabled = true;
   int offset = 0;
+
+  Map<String, bool> adhan = {};
+  Map<String, bool> popup = {};
+
+  final List<String> prayers = [
+    'Fajr','Dhuhr','Asr','Maghrib','Isha','Sunrise'
+  ];
 
   @override
   void initState() {
@@ -25,25 +32,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
     loadSettings();
   }
 
+  // 🔥 LOAD ALL SETTINGS
   Future<void> loadSettings() async {
     selectedMethod = await SettingsService.getCalculationMethod();
     selectedMadhab = await SettingsService.getMadhab();
     notificationsEnabled = await SettingsService.getNotificationsEnabled();
     offset = await SettingsService.getOffset();
 
+    for (final p in prayers) {
+      adhan[p] = await SettingsService.isAdhanEnabled(p);
+      popup[p] = await SettingsService.isPopupEnabled(p);
+    }
+
     setState(() {});
   }
 
+  // 🔥 SAVE ALL SETTINGS
   Future<void> saveAndContinue() async {
     await SettingsService.saveCalculationMethod(selectedMethod);
     await SettingsService.saveMadhab(selectedMadhab);
     await SettingsService.setNotificationsEnabled(notificationsEnabled);
     await SettingsService.setOffset(offset);
 
-    // 🔰 First launch completed
+    // 🔥 SAVE PER PRAYER SETTINGS
+    for (final p in prayers) {
+      await SettingsService.setAdhanEnabled(p, adhan[p]!);
+      await SettingsService.setPopupEnabled(p, popup[p]!);
+    }
+
     await SettingsService.completeFirstLaunch();
 
-    // 👉 Go to prayer screen
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const MainScreen()),
@@ -64,10 +82,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // 📍 Calculation Method
           const Padding(
             padding: EdgeInsets.all(16),
-            child: Text(
-              "Calculation Method",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            child: Text("Calculation Method",
+                style: TextStyle(fontWeight: FontWeight.bold)),
           ),
 
           ...CalculationMethod.values.map((method) {
@@ -83,13 +99,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Divider(),
 
-          // 📍 Madhhab
+          // 📍 Madhab
           const Padding(
             padding: EdgeInsets.all(16),
-            child: Text(
-              "Madhab",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            child: Text("Madhab",
+                style: TextStyle(fontWeight: FontWeight.bold)),
           ),
 
           ...MadhabType.values.map((madhab) {
@@ -105,7 +119,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Divider(),
 
-          // 🔔 Notifications
+          // 🔔 MASTER NOTIFICATION
           SwitchListTile(
             title: const Text("Enable Notifications"),
             value: notificationsEnabled,
@@ -116,21 +130,64 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Divider(),
 
-          // ⏰ Offset Slider
+          // 🔥 PER PRAYER SETTINGS
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text("Prayer Notifications",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+
+          ...prayers.map((p) {
+            return Card(
+              child: Column(
+                children: [
+                  ListTile(title: Text(p)),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Row(
+                        children: [
+                          const Text("Adhan"),
+                          Switch(
+                            value: adhan[p] ?? true,
+                            onChanged: (v) =>
+                                setState(() => adhan[p] = v),
+                          ),
+                        ],
+                      ),
+
+                      Row(
+                        children: [
+                          const Text("Popup"),
+                          Switch(
+                            value: popup[p] ?? true,
+                            onChanged: (v) =>
+                                setState(() => popup[p] = v),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }),
+
+          const Divider(),
+
+          // ⏰ Offset
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                Text(
-                  "Adjust Prayer Time Offset: $offset min",
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
+                Text("Offset: $offset min",
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 Slider(
                   min: -10,
                   max: 10,
                   divisions: 20,
                   value: offset.toDouble(),
-                  label: "$offset",
                   onChanged: (value) {
                     setState(() => offset = value.toInt());
                   },
@@ -141,16 +198,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 20),
 
-          // ✅ SAVE BUTTON
+          // ✅ SAVE
           Padding(
             padding: const EdgeInsets.all(16),
             child: ElevatedButton(
               onPressed: saveAndContinue,
-              child: const Text("Save & Continue"),
+              child: const Text("Save"),
             ),
           ),
-
-          const SizedBox(height: 20),
         ],
       ),
     );

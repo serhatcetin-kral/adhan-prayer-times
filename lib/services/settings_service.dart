@@ -23,7 +23,7 @@ class SettingsService {
 
   static Future<CalculationMethod> getCalculationMethod() async {
     final prefs = await SharedPreferences.getInstance();
-    final index = prefs.getInt('calculation_method') ?? 2;
+    final index = prefs.getInt('calculation_method') ?? CalculationMethod.isna.index;
     return CalculationMethod.values[index];
   }
 
@@ -35,7 +35,7 @@ class SettingsService {
 
   static Future<MadhabType> getMadhab() async {
     final prefs = await SharedPreferences.getInstance();
-    final index = prefs.getInt('madhab') ?? 0;
+    final index = prefs.getInt('madhab') ?? MadhabType.standard.index;
     return MadhabType.values[index];
   }
 
@@ -60,7 +60,27 @@ class SettingsService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt('offset') ?? 0;
   }
+// 🔊 ADHAN SETTING
+  static Future<void> setAdhanEnabled(String prayer, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('adhan_$prayer', value);
+  }
 
+  static Future<bool> isAdhanEnabled(String prayer) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('adhan_$prayer') ?? true;
+  }
+
+// 🔔 POPUP SETTING
+  static Future<void> setPopupEnabled(String prayer, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('popup_$prayer', value);
+  }
+
+  static Future<bool> isPopupEnabled(String prayer) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('popup_$prayer') ?? true;
+  }
   // 🔥 EXTRA (NEEDED FOR YOUR PRAYER SCREEN)
 
   static Future<SharedPreferences> getPrefs() async {

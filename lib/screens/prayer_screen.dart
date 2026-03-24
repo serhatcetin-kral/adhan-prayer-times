@@ -91,6 +91,8 @@ class _PrayerScreenState extends State<PrayerScreen> {
 
       if (notificationsEnabled) {
         await NotificationService.scheduleAllPrayerNotifications(times);
+      } else {
+        await NotificationService.flutterLocalNotificationsPlugin.cancelAll();
       }
 
       final prefs = await SettingsService.getPrefs();

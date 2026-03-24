@@ -22,6 +22,7 @@ extension CalculationMethodExtension on CalculationMethod {
         return "Turkish";
       case CalculationMethod.karachi:
         return "Karachi";
+
     }
   }
 
