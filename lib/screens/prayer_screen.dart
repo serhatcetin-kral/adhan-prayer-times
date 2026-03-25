@@ -9,6 +9,8 @@ import '../services/settings_service.dart';
 import '../services/location_name_service.dart';
 import '../services/notification_service.dart';
 import 'package:intl/intl.dart';
+
+
 class PrayerScreen extends StatefulWidget {
   const PrayerScreen({super.key});
 
@@ -73,6 +75,15 @@ class _PrayerScreenState extends State<PrayerScreen> {
 
       final pos = await LocationService.getUserLocation();
 
+      if (pos == null) {
+        setState(() {
+          _isLoading = false;
+          _isOffline = true;
+          locationName = "Location unavailable";
+        });
+        return;
+      }
+
       final name = await LocationNameService.getLocationName(
         pos.latitude,
         pos.longitude,
@@ -95,10 +106,6 @@ class _PrayerScreenState extends State<PrayerScreen> {
         await NotificationService.flutterLocalNotificationsPlugin.cancelAll();
       }
 
-      final prefs = await SettingsService.getPrefs();
-      await prefs.setString('cached_prayer_times', jsonEncode(times));
-      await prefs.setString('cached_location_name', name);
-
       if (!mounted) return;
 
       setState(() {
@@ -114,14 +121,31 @@ class _PrayerScreenState extends State<PrayerScreen> {
     } catch (e) {
       debugPrint("Offline/Error: $e");
 
+      final saved = await PrayerApiService.loadSavedPrayerTimes();
+
       if (!mounted) return;
 
-      setState(() {
-        _isLoading = false;
-        _isOffline = true;
-      });
+      if (saved != null) {
+        final times = Map<String, String>.from(saved['timings']);
+
+        setState(() {
+          prayerTimes = times;
+          hijriDate = saved['hijri'];
+          _isLoading = false;
+          _isOffline = true;
+        });
+
+        _startTimer(times);
+      } else {
+        setState(() {
+          _isLoading = false;
+          _isOffline = true;
+          locationName = "No internet connection";
+        });
+      }
     }
   }
+
 
   // ===============================
   // TIMER
@@ -184,7 +208,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Settings"),
+        title: const Text("Prayer Salah Times"),
         centerTitle: true,
       ),
       body: _isLoading
@@ -192,7 +216,19 @@ class _PrayerScreenState extends State<PrayerScreen> {
           : Column(
         children: [
           // 🔴 OFFLINE
-          if (_isOffline)
+          // 🔴 FIRST INSTALL (no data at all)
+          if (_isOffline && prayerTimes == null)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                "Please connect to internet for first setup",
+                style: TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+            )
+
+// 🟡 OFFLINE BUT HAS DATA
+          else if (_isOffline)
             Container(
               padding: const EdgeInsets.all(8),
               color: Colors.red,
@@ -207,19 +243,34 @@ class _PrayerScreenState extends State<PrayerScreen> {
 
 
           // 📅 HIJRI DATE
+          // 📍 LOCATION + DATE
           Column(
             children: [
               Text(
-                gregorian,
-                style: const TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              Text(
-                hijriDate != null ? "🌙 $hijriDate AH" : "",
+                locationName ?? "Loading location...",
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              const SizedBox(height: 4),
+
+              Text(
+                gregorian,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
+
+              if (hijriDate != null)
+                Text(
+                  "🌙 $hijriDate AH",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
             ],
           ),
 

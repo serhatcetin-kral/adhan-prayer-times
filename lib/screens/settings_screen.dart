@@ -48,20 +48,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   // 🔥 SAVE ALL SETTINGS
-  Future<void> saveAndContinue() async {
+  Future<void> saveSettings() async {
     await SettingsService.saveCalculationMethod(selectedMethod);
     await SettingsService.saveMadhab(selectedMadhab);
     await SettingsService.setNotificationsEnabled(notificationsEnabled);
     await SettingsService.setOffset(offset);
 
-    // 🔥 SAVE PER PRAYER SETTINGS
-    for (final p in prayers) {
-      await SettingsService.setAdhanEnabled(p, adhan[p]!);
-      await SettingsService.setPopupEnabled(p, popup[p]!);
-    }
-
+    // 🔥 mark first launch done
     await SettingsService.completeFirstLaunch();
 
+    // 🔥 GO TO MAIN SCREEN ONLY FIRST TIME
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const MainScreen()),
@@ -201,9 +197,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // ✅ SAVE
           Padding(
             padding: const EdgeInsets.all(16),
-            child: ElevatedButton(
-              onPressed: saveAndContinue,
-              child: const Text("Save"),
+            child: ElevatedButton.icon(
+              onPressed: saveSettings,
+              icon: const Icon(Icons.save),
+              label: const Text("Save Settings"),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
             ),
           ),
         ],

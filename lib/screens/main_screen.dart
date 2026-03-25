@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'prayer_screen.dart';
 import 'settings_screen.dart';
-
+import 'more_screen.dart';
 // TEMP QIBLA PLACEHOLDER
 class QiblaScreen extends StatelessWidget {
   const QiblaScreen({super.key});
@@ -29,6 +29,7 @@ class _MainScreenState extends State<MainScreen> {
     PrayerScreen(),
     QiblaScreen(),
     SettingsScreen(),
+    MoreScreen()
   ];
 
   void _onItemTapped(int index) {
@@ -45,6 +46,7 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed, // 🔥 IMPORTANT
 
         items: const [
           BottomNavigationBarItem(
@@ -58,6 +60,10 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
             label: "Settings",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.menu),
+            label: "More",
           ),
         ],
       ),
