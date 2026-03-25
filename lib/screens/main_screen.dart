@@ -1,19 +1,8 @@
 import 'package:flutter/material.dart';
-
 import 'prayer_screen.dart';
+import 'qibla_screen.dart';
 import 'settings_screen.dart';
 import 'more_screen.dart';
-// TEMP QIBLA PLACEHOLDER
-class QiblaScreen extends StatelessWidget {
-  const QiblaScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text("Qibla Screen (Coming Soon)"),
-    );
-  }
-}
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -29,7 +18,7 @@ class _MainScreenState extends State<MainScreen> {
     PrayerScreen(),
     QiblaScreen(),
     SettingsScreen(),
-    MoreScreen()
+    MoreScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -42,12 +31,10 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _pages[_selectedIndex],
-
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed, // 🔥 IMPORTANT
-
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.access_time),

@@ -105,6 +105,7 @@ class NotificationService {
           iOS: DarwinNotificationDetails(
             presentAlert: true,
             presentSound: true,
+            sound: 'adhan.caf'
           ),
         ),
 

@@ -3,6 +3,10 @@
 <plist version="1.0">
 <dict>
 <key>NSLocationWhenInUseUsageDescription</key>
+<string>We need your location to show Qibla direction.</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>We need your location to show Qibla direction.</string>
+<key>NSLocationWhenInUseUsageDescription</key>
 <string>This app needs location to calculate prayer times</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
