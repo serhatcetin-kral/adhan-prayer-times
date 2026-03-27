@@ -16,6 +16,7 @@ dependencies:
   timezone: ^0.9.4
   flutter_compass: ^0.8.1
   vibration: ^3.1.5
+  url_launcher: ^6.3.0 #for google qibla finder bottom
   # 📍 Location
   geolocator: ^9.0.2
   geocoding: ^2.2.0

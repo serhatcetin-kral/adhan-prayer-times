@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:vibration/vibration.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../services/location_service.dart';
 import '../services/location_name_service.dart';
@@ -62,10 +63,37 @@ class _QiblaScreenState extends State<QiblaScreen> {
     }
   }
 
+  // ============================
+  // GOOGLE QIBLA FINDER BUTTON
+  // ============================
+  Future<void> _openGoogleQibla() async {
+    final url = Uri.parse('https://qiblafinder.withgoogle.com');
+
+    try {
+      await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Could not open Google Qibla Finder"),
+        ),
+      );
+    }
+  }
+
+  // ============================
+  // ALIGNMENT CHECK
+  // ============================
   bool _isAligned(double diff) {
     return diff.abs() <= 8;
   }
 
+  // ============================
+  // VIBRATION
+  // ============================
   Future<void> _handleVibration(bool aligned) async {
     if (aligned && !hasVibrated) {
       if (await Vibration.hasVibrator() ?? false) {
@@ -220,7 +248,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                           ),
                         ),
 
-                        // Arrow
+                        // Qibla Arrow
                         Transform.rotate(
                           angle: diff * (math.pi / 180),
                           child: Column(
@@ -277,6 +305,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
 
                     const SizedBox(height: 24),
 
+                    // Tip Box
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
@@ -288,6 +317,36 @@ class _QiblaScreenState extends State<QiblaScreen> {
                         "Tip: If the compass seems wrong, move your phone in a figure 8 to calibrate it.",
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Google Qibla Finder Button
+                    ElevatedButton.icon(
+                      onPressed: _openGoogleQibla,
+                      icon: const Icon(Icons.open_in_new),
+                      label: const Text("Open Google AR Qibla Finder"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        foregroundColor: Colors.white,
+                        elevation: 4,
+                        minimumSize:
+                        const Size(double.infinity, 52),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    const Text(
+                      "Optional: Use Google’s AR Qibla if your compass seems inaccurate.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
                       ),
                     ),
                   ],
