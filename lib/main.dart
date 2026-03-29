@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-import 'screens/prayer_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/main_screen.dart';
 import 'services/notification_service.dart';
 import 'services/settings_service.dart';
-import 'screens/main_screen.dart';
+
 Future<void> setupTimezone() async {
   tz.setLocalLocation(tz.local);
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // LOCK APP TO PORTRAIT ONLY
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
 
   tz.initializeTimeZones();
   await setupTimezone();
@@ -47,17 +53,24 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     if (isFirstLaunch == null) {
       return const MaterialApp(
+        debugShowCheckedModeBanner: false,
         home: Scaffold(
-          body: Center(child: CircularProgressIndicator()),
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
         ),
       );
     }
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'Salat Times',
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+      ),
       home: isFirstLaunch!
-          ? const SettingsScreen() // 👉 first install
-          :  const MainScreen(),  // 👉 normal app
+          ? const SettingsScreen() // first install
+          : const MainScreen(),    // normal app
     );
   }
 }
