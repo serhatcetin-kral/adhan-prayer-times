@@ -86,4 +86,15 @@ class SettingsService {
   static Future<SharedPreferences> getPrefs() async {
     return await SharedPreferences.getInstance();
   }
+  // ✅ INDIVIDUAL PRAYER OFFSET
+
+  static Future<void> setPrayerOffset(String prayer, int value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('offset_$prayer', value);
+  }
+
+  static Future<int> getPrayerOffset(String prayer) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('offset_$prayer') ?? 0;
+  }
 }

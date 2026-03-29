@@ -1,15 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../models/calculation_method.dart';
-import '../models/madhab_type.dart';
 import '../services/location_service.dart';
 import '../services/prayer_api_service.dart';
 import '../services/settings_service.dart';
 import '../services/location_name_service.dart';
 import '../services/notification_service.dart';
 import 'package:intl/intl.dart';
-
+import '../models/calculation_method.dart';
+import '../models/madhab_type.dart';
 
 class PrayerScreen extends StatefulWidget {
   const PrayerScreen({super.key});
@@ -29,7 +27,9 @@ class _PrayerScreenState extends State<PrayerScreen> {
   Timer? _timer;
   String nextPrayerName = "";
   String countdown = "";
+
   final gregorian = DateFormat.yMMMMEEEEd().format(DateTime.now());
+
   @override
   void initState() {
     super.initState();
@@ -69,9 +69,17 @@ class _PrayerScreenState extends State<PrayerScreen> {
     try {
       final method = await SettingsService.getCalculationMethod();
       final madhab = await SettingsService.getMadhab();
-      final offset = await SettingsService.getOffset();
+      final globalOffset = await SettingsService.getOffset();
       final notificationsEnabled =
       await SettingsService.getNotificationsEnabled();
+
+      // ✅ NEW: load individual prayer offsets
+      final fajrOffset = await SettingsService.getPrayerOffset('Fajr');
+      final sunriseOffset = await SettingsService.getPrayerOffset('Sunrise');
+      final dhuhrOffset = await SettingsService.getPrayerOffset('Dhuhr');
+      final asrOffset = await SettingsService.getPrayerOffset('Asr');
+      final maghribOffset = await SettingsService.getPrayerOffset('Maghrib');
+      final ishaOffset = await SettingsService.getPrayerOffset('Isha');
 
       final pos = await LocationService.getUserLocation();
 
@@ -94,7 +102,15 @@ class _PrayerScreenState extends State<PrayerScreen> {
         longitude: pos.longitude,
         method: method.methodId,
         school: madhab.schoolId,
-        globalOffset: offset,
+        globalOffset: globalOffset,
+
+        // ✅ pass all prayer offsets
+        fajrOffset: fajrOffset,
+        sunriseOffset: sunriseOffset,
+        dhuhrOffset: dhuhrOffset,
+        asrOffset: asrOffset,
+        maghribOffset: maghribOffset,
+        ishaOffset: ishaOffset,
       );
 
       final times = Map<String, String>.from(response['timings']);
@@ -117,7 +133,6 @@ class _PrayerScreenState extends State<PrayerScreen> {
       });
 
       _startTimer(times);
-
     } catch (e) {
       debugPrint("Offline/Error: $e");
 
@@ -145,7 +160,6 @@ class _PrayerScreenState extends State<PrayerScreen> {
       }
     }
   }
-
 
   // ===============================
   // TIMER
@@ -215,7 +229,6 @@ class _PrayerScreenState extends State<PrayerScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
         children: [
-          // 🔴 OFFLINE
           // 🔴 FIRST INSTALL (no data at all)
           if (_isOffline && prayerTimes == null)
             const Padding(
@@ -227,7 +240,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
               ),
             )
 
-// 🟡 OFFLINE BUT HAS DATA
+          // 🟡 OFFLINE BUT HAS DATA
           else if (_isOffline)
             Container(
               padding: const EdgeInsets.all(8),
@@ -240,9 +253,6 @@ class _PrayerScreenState extends State<PrayerScreen> {
               ),
             ),
 
-
-
-          // 📅 HIJRI DATE
           // 📍 LOCATION + DATE
           Column(
             children: [
@@ -254,7 +264,6 @@ class _PrayerScreenState extends State<PrayerScreen> {
                 ),
               ),
               const SizedBox(height: 4),
-
               Text(
                 gregorian,
                 style: const TextStyle(
@@ -262,7 +271,6 @@ class _PrayerScreenState extends State<PrayerScreen> {
                   color: Colors.grey,
                 ),
               ),
-
               if (hijriDate != null)
                 Text(
                   "🌙 $hijriDate AH",
@@ -278,42 +286,38 @@ class _PrayerScreenState extends State<PrayerScreen> {
 
           // ⏳ NEXT PRAYER
           if (nextPrayerName.isNotEmpty)
-            Column(
-              children: [
-                Container(
-                  margin: const EdgeInsets.all(12),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.teal,
-                    borderRadius: BorderRadius.circular(16),
+            Container(
+              margin: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.teal,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  const Text(
+                    "Next Prayer",
+                    style: TextStyle(color: Colors.white70),
                   ),
-                  child: Column(
-                    children: [
-                      Text(
-                        "Next Prayer",
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        nextPrayerName,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        countdown,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 6),
+                  Text(
+                    nextPrayerName,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 6),
+                  Text(
+                    countdown,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
             ),
 
           const SizedBox(height: 10),
@@ -331,11 +335,11 @@ class _PrayerScreenState extends State<PrayerScreen> {
                   decoration: BoxDecoration(
                     color: isNext ? Colors.teal : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         color: Colors.black12,
                         blurRadius: 4,
-                        offset: const Offset(0, 2),
+                        offset: Offset(0, 2),
                       )
                     ],
                   ),
