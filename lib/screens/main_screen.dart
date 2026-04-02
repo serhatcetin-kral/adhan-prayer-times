@@ -27,6 +27,15 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  Widget _navIcon(String path) {
+    return Image.asset(
+      path,
+      width: 54,
+      height: 54,
+      fit: BoxFit.contain,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,21 +44,24 @@ class _MainScreenState extends State<MainScreen> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
-        items: const [
+        selectedItemColor: Colors.teal,
+        unselectedItemColor: Colors.grey,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.access_time),
+            icon: _navIcon('assets/prayer_icon.png'),
             label: "Prayer",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.explore),
+            icon: _navIcon('assets/qibla_icon.png'),
             label: "Qibla",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
+            icon: _navIcon('assets/settings_icon.png'),
             label: "Settings",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.menu),
+            icon: _navIcon('assets/more_icon.png'),
             label: "More",
           ),
         ],

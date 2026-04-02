@@ -1,89 +1,23 @@
-// import 'package:flutter/material.dart';
-//
-// import 'about_screen.dart';
-// import 'dua_screen.dart';
-// import 'zikr_screen.dart';
-//
-// class MoreScreen extends StatelessWidget {
-//   const MoreScreen({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text("More"),
-//         centerTitle: true,
-//       ),
-//       body: ListView(
-//         children: [
-//           _buildItem(
-//             context,
-//             icon: Icons.info,
-//             title: "About",
-//             onTap: () {
-//               Navigator.push(
-//                 context,
-//                 MaterialPageRoute(
-//                   builder: (_) => const AboutScreen(),
-//                 ),
-//               );
-//             },
-//           ),
-//
-//           _buildItem(
-//             context,
-//             icon: Icons.menu_book,
-//             title: "Dua",
-//             onTap: () {
-//               Navigator.push(
-//                 context,
-//                 MaterialPageRoute(
-//                   builder: (_) => const DuaScreen(),
-//                 ),
-//               );
-//             },
-//           ),
-//
-//           _buildItem(
-//             context,
-//             icon: Icons.self_improvement,
-//             title: "Zikr",
-//             onTap: () {
-//               Navigator.push(
-//                 context,
-//                 MaterialPageRoute(
-//                   builder: (_) => const ZikrScreen(),
-//                 ),
-//               );
-//             },
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   Widget _buildItem(
-//       BuildContext context, {
-//         required IconData icon,
-//         required String title,
-//         required VoidCallback onTap,
-//       }) {
-//     return ListTile(
-//       leading: Icon(icon, color: Colors.teal),
-//       title: Text(title),
-//       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-//       onTap: onTap,
-//     );
-//   }
-// }
-
-///////////
 import 'package:flutter/material.dart';
 import 'zikr_screen.dart';
 import 'dua_screen.dart';
 import 'calendar_screen.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../widgets/app_icon.dart';
+
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
+
+  Future<void> _rateApp() async {
+    final Uri url = Uri.parse(
+      'https://apps.apple.com/us/app/sala-prayer-times/id6759267391',
+    );
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,12 +26,16 @@ class MoreScreen extends StatelessWidget {
         title: const Text("More"),
         centerTitle: true,
       ),
-      body: ListView(
+      body: GridView.count(
+        crossAxisCount: 2,
+        padding: const EdgeInsets.all(16),
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
         children: [
           _buildItem(
             context,
-            icon: Icons.self_improvement,
-            title: "Zikr",
+            imagePath: 'assets/zikr_icon.png',
+            title: "",
             onTap: () {
               Navigator.push(
                 context,
@@ -109,8 +47,8 @@ class MoreScreen extends StatelessWidget {
           ),
           _buildItem(
             context,
-            icon: Icons.self_improvement,
-            title: "Duas",
+            imagePath: 'assets/duas_icon.png',
+            title: "",
             onTap: () {
               Navigator.push(
                 context,
@@ -122,8 +60,8 @@ class MoreScreen extends StatelessWidget {
           ),
           _buildItem(
             context,
-            icon: Icons.self_improvement,
-            title: "Hijri Calendar",
+            imagePath: 'assets/hijri_calendar.png',
+            title: "",
             onTap: () {
               Navigator.push(
                 context,
@@ -133,6 +71,24 @@ class MoreScreen extends StatelessWidget {
               );
             },
           ),
+          _buildItem(
+            context,
+            imagePath: 'assets/share_app.png',
+            title: "",
+            onTap: () {
+              Share.share(
+                "Check out my prayer app! 🕌\n\nDownload it here:\nhttps://apps.apple.com/us/app/sala-prayer-times/id6759267391",
+              );
+            },
+          ),
+          _buildItem(
+            context,
+            imagePath: 'assets/rate_app.png',
+            title: "",
+            onTap: () async {
+              await _rateApp();
+            },
+          ),
         ],
       ),
     );
@@ -140,15 +96,41 @@ class MoreScreen extends StatelessWidget {
 
   Widget _buildItem(
       BuildContext context, {
-        required IconData icon,
+        String? imagePath,
         required String title,
         required VoidCallback onTap,
       }) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.teal),
-      title: Text(title),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+    return GestureDetector(
       onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // 🔥 BIG ICON (NO BACKGROUND)
+          SizedBox(
+            width: 150,
+            height: 150,
+            child: imagePath != null
+                ? Image.asset(
+              imagePath,
+              fit: BoxFit.contain,
+            )
+                : const SizedBox(),
+          ),
+
+          const SizedBox(height: 10),
+
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
+
+
+
   }
 }

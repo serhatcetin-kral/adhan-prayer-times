@@ -9,6 +9,9 @@ import 'package:intl/intl.dart';
 import '../models/calculation_method.dart';
 import '../models/madhab_type.dart';
 
+
+
+
 class PrayerScreen extends StatefulWidget {
   const PrayerScreen({super.key});
 
@@ -92,10 +95,20 @@ class _PrayerScreenState extends State<PrayerScreen> {
         return;
       }
 
-      final name = await LocationNameService.getLocationName(
-        pos.latitude,
-        pos.longitude,
-      );
+      String name = "Current Location";
+
+      try {
+        final fetchedName = await LocationNameService.getLocationName(
+          pos.latitude,
+          pos.longitude,
+        );
+
+        if (fetchedName != null && fetchedName.trim().isNotEmpty) {
+          name = fetchedName;
+        }
+      } catch (e) {
+        debugPrint("Location name error: $e");
+      }
 
       final response = await PrayerApiService.getPrayerTimes(
         latitude: pos.latitude,
@@ -122,6 +135,9 @@ class _PrayerScreenState extends State<PrayerScreen> {
         await NotificationService.flutterLocalNotificationsPlugin.cancelAll();
       }
 
+
+
+
       if (!mounted) return;
 
       setState(() {
@@ -146,6 +162,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
         setState(() {
           prayerTimes = times;
           hijriDate = saved['hijri'];
+          locationName ??= "Current Location";
           _isLoading = false;
           _isOffline = true;
         });
@@ -215,6 +232,35 @@ class _PrayerScreenState extends State<PrayerScreen> {
         "${(d.inSeconds % 60).toString().padLeft(2, '0')}";
   }
 
+  String _findNextPrayerName(Map<String, String> times) {
+    final now = DateTime.now();
+    final sequence = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+
+    for (final name in sequence) {
+      final t = _parseTime(times[name]!);
+      if (t.isAfter(now)) {
+        return name;
+      }
+    }
+
+    return 'Fajr';
+  }
+
+  String _findNextPrayerCountdown(Map<String, String> times) {
+    final now = DateTime.now();
+    final sequence = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+
+    for (final name in sequence) {
+      final t = _parseTime(times[name]!);
+      if (t.isAfter(now)) {
+        return _formatDuration(t.difference(now));
+      }
+    }
+
+    final fajr = _parseTime(times['Fajr']!).add(const Duration(days: 1));
+    return _formatDuration(fajr.difference(now));
+  }
+
   // ===============================
   // UI
   // ===============================
@@ -243,13 +289,27 @@ class _PrayerScreenState extends State<PrayerScreen> {
           // 🟡 OFFLINE BUT HAS DATA
           else if (_isOffline)
             Container(
-              padding: const EdgeInsets.all(8),
-              color: Colors.red,
-              width: double.infinity,
-              child: const Text(
-                "No Internet - Showing saved prayer times",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white),
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.orange.shade200),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.cloud_off, color: Colors.orange),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      "Offline mode — showing saved prayer times",
+                      style: TextStyle(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
 
@@ -257,7 +317,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
           Column(
             children: [
               Text(
-                locationName ?? "Loading location...",
+                locationName ?? "Current Location",
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
