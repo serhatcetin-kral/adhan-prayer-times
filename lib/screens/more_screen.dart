@@ -4,15 +4,62 @@ import 'dua_screen.dart';
 import 'calendar_screen.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../widgets/app_icon.dart';
+
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
+
+  void _showSupportOptions(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Support the App ❤️"),
+        content: const Text("Choose an amount"),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _openSupportLink('https://buy.stripe.com/3cI28qfxR9y25NAgam1Nu02');
+            },
+            child: const Text("\$0.99"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _openSupportLink('https://buy.stripe.com/cNicN499tcKe3Fs8HU1Nu00');
+            },
+            child: const Text("\$1.99"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _openSupportLink('https://buy.stripe.com/eVq5kCbhBh0ub7Ugam1Nu01');
+            },
+            child: const Text("\$2.99"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Cancel"),
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<void> _rateApp() async {
     final Uri url = Uri.parse(
       'https://apps.apple.com/us/app/sala-prayer-times/id6759267391',
     );
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Future<void> _openSupportLink(String link) async {
+    final Uri url = Uri.parse(link);
 
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -89,6 +136,13 @@ class MoreScreen extends StatelessWidget {
               await _rateApp();
             },
           ),
+          _buildItem(
+            context,
+            imagePath: 'assets/support.png',
+            title: "",
+            onTap: () async {_showSupportOptions(context);
+            },
+          ),
         ],
       ),
     );
@@ -105,7 +159,6 @@ class MoreScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // 🔥 BIG ICON (NO BACKGROUND)
           SizedBox(
             width: 150,
             height: 150,
@@ -116,9 +169,7 @@ class MoreScreen extends StatelessWidget {
             )
                 : const SizedBox(),
           ),
-
           const SizedBox(height: 10),
-
           Text(
             title,
             style: const TextStyle(
@@ -129,8 +180,5 @@ class MoreScreen extends StatelessWidget {
         ],
       ),
     );
-
-
-
   }
 }
