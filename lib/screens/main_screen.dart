@@ -57,7 +57,7 @@ class _MainScreenState extends State<MainScreen> {
             label: "Qibla",
           ),
           BottomNavigationBarItem(
-            icon: _navIcon('assets/settings_icon.png'),
+            icon: _navIcon('assets/settings.png'),
             label: "Settings",
           ),
           BottomNavigationBarItem(

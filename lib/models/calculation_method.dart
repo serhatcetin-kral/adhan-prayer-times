@@ -13,7 +13,7 @@ extension CalculationMethodExtension on CalculationMethod {
       case CalculationMethod.karachi:
         return "Karachi";
       case CalculationMethod.isna:
-        return "ISNA";
+        return "ISNA (Islamic Society of North America)";
       case CalculationMethod.mwl:
         return "Muslim World League";
       case CalculationMethod.makkah:

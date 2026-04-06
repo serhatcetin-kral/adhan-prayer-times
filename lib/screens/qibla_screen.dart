@@ -156,7 +156,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                 ),
                 child: Column(
                   children: [
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 19),
 
                     Text(
                       locationName,
@@ -167,7 +167,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                       textAlign: TextAlign.center,
                     ),
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 9),
 
                     Text(
                       "Qibla: ${qiblaBearing!.toStringAsFixed(1)}°",
@@ -277,7 +277,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 26),
 
                     Text(
                       aligned
@@ -303,7 +303,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
                     // Tip Box
                     Container(
@@ -320,33 +320,96 @@ class _QiblaScreenState extends State<QiblaScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 20),
 
-                    // Google Qibla Finder Button
-                    ElevatedButton.icon(
-                      onPressed: _openGoogleQibla,
-                      icon: const Icon(Icons.open_in_new),
-                      label: const Text("Open Google AR Qibla Finder"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                        elevation: 4,
-                        minimumSize:
-                        const Size(double.infinity, 52),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+
+                    const SizedBox(height: 16),
+
+// 🌍 GOOGLE QIBLA FINDER (MOVED UP + POLISHED)
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: 14),
+                      child: GestureDetector(
+                        onTap: _openGoogleQibla,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF0F9D94), Color(0xFF13B8A6)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.teal.withOpacity(0.22),
+                                blurRadius: 14,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(
+                                Icons.explore_rounded,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                              SizedBox(width: 10),
+                              Flexible(
+                                child: Text(
+                                  "Open Google AR Qibla Finder",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15.5,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.2,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 10),
-
                     const Text(
-                      "Optional: Use Google’s AR Qibla if your compass seems inaccurate.",
+                      "Use Google’s AR Qibla if your compass feels inaccurate.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 13.5,
                         color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+// 💡 TIP BOX (NOW BELOW BUTTON)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.teal.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Text(
+                        "Tip: If the compass seems wrong, move your phone in a figure 8 to calibrate it.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 14.5),
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    const Text(
+                      "Optional: Use Google’s AR Qibla if your compass feels inaccurate.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],

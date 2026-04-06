@@ -78,6 +78,7 @@ class MoreScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         mainAxisSpacing: 20,
         crossAxisSpacing: 20,
+        childAspectRatio: 0.9,
         children: [
           _buildItem(
             context,
@@ -160,8 +161,8 @@ class MoreScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(
-            width: 150,
-            height: 150,
+            width: 130,
+            height: 130,
             child: imagePath != null
                 ? Image.asset(
               imagePath,

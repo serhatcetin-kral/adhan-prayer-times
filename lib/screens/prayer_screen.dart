@@ -39,7 +39,28 @@ class _PrayerScreenState extends State<PrayerScreen> {
     _loadCachedData();
     _loadData();
   }
+//////
 
+
+  IconData _getPrayerIcon(String prayerName) {
+    switch (prayerName) {
+      case 'Fajr':
+        return Icons.nightlight_round;
+      case 'Sunrise':
+        return Icons.wb_sunny_rounded;
+      case 'Dhuhr':
+        return Icons.light_mode_rounded;
+      case 'Asr':
+        return Icons.wb_sunny_outlined;
+      case 'Maghrib':
+        return Icons.wb_twilight_rounded;
+      case 'Isha':
+        return Icons.dark_mode_rounded;
+      default:
+        return Icons.access_time_rounded;
+    }
+  }
+  ////
   @override
   void dispose() {
     _timer?.cancel();
@@ -314,111 +335,209 @@ class _PrayerScreenState extends State<PrayerScreen> {
             ),
 
           // 📍 LOCATION + DATE
-          Column(
-            children: [
-              Text(
-                locationName ?? "Current Location",
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+
+          Container(
+            margin: const EdgeInsets.fromLTRB(14, 10, 14, 6),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                gregorian,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
+              ],
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.location_on_rounded,
+                      color: Colors.teal,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        locationName ?? "Current Location",
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              if (hijriDate != null)
+                const SizedBox(height: 8),
                 Text(
-                  "🌙 $hijriDate AH",
+                  gregorian,
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-            ],
+                if (hijriDate != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    "🌙 $hijriDate AH",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.teal,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
 
-          const SizedBox(height: 10),
 
-          // ⏳ NEXT PRAYER
+
+          const SizedBox(height: 10),
+// ⏳ NEXT PRAYER (SMALLER CLEAN VERSION)
           if (nextPrayerName.isNotEmpty)
             Container(
-              margin: const EdgeInsets.all(12),
-              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.fromLTRB(14, 6, 14, 6),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               decoration: BoxDecoration(
-                color: Colors.teal,
-                borderRadius: BorderRadius.circular(16),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0F9D94), Color(0xFF13B8A6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.teal.withOpacity(0.20),
+                    blurRadius: 14,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
-                  const Text(
-                    "Next Prayer",
-                    style: TextStyle(color: Colors.white70),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.notifications_active_rounded,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        "Next Prayer",
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.85),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     nextPrayerName,
                     style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 21,
+                      fontWeight: FontWeight.w700,
                       color: Colors.white,
+                      letterSpacing: 0.2,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    countdown,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Text(
+                      countdown.replaceAll(":", " : "),
+                      style: const TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: 1,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
+          const SizedBox(height: 6),
 
           const SizedBox(height: 10),
 
           // 📋 PRAYER LIST
+          // 📋 PRAYER LIST
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               children: prayerTimes!.entries.map((e) {
                 final isNext = e.key == nextPrayerName;
 
-                return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 6),
-                  padding: const EdgeInsets.all(16),
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  margin: const EdgeInsets.symmetric(vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isNext ? Colors.teal : Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: const [
+                    color: isNext ? Colors.teal : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
                       BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
-                      )
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
                     ],
+                    border: Border.all(
+                      color: isNext ? Colors.teal : Colors.grey.shade200,
+                      width: 1,
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        e.key,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: isNext ? Colors.white : Colors.black,
-                        ),
+                      Row(
+                        children: [
+                          Icon(
+                            isNext
+                                ? Icons.notifications_active_rounded
+                                : _getPrayerIcon(e.key),
+                            size: 18,
+                            color: isNext ? Colors.white : Colors.teal,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            e.key,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.2,
+                              color: isNext ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                        ],
                       ),
                       Text(
                         e.value,
                         style: TextStyle(
-                          fontSize: 18,
-                          color: isNext ? Colors.white : Colors.black,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: isNext ? Colors.white : Colors.black87,
                         ),
                       ),
                     ],

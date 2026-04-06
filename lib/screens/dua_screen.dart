@@ -11,14 +11,36 @@ class DuaScreen extends StatefulWidget {
 
 class _DuaScreenState extends State<DuaScreen> { // Fixed: only one underscore
   String _searchQuery = "";
-
   static const List<DuaModel> _duas = [
+    // 🌙 Ramadan / Existing
     DuaModel(id: 'suhoor', title: 'Suhoor (Starting Fast)', arabic: 'وَبِصَوْمِ غَدٍ نَّوَيْتُ مِنْ شَهْرِ رَمَضَانَ', english: 'I intend to keep the fast for tomorrow in the month of Ramadan.'),
     DuaModel(id: 'iftar', title: 'Iftar (Breaking Fast)', arabic: 'اللَّهُمَّ لَكَ صُمْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ', english: 'O Allah, I fasted for You and I break my fast with Your sustenance.'),
     DuaModel(id: 'laylatul_qadr', title: 'Laylatul Qadr', arabic: 'اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي', english: 'O Allah, You are Most Forgiving and You love forgiveness, so forgive me.'),
+
+    // 🌅 Daily Duas
     DuaModel(id: 'morning', title: 'Morning Dua', arabic: 'اللَّهُمَّ بِكَ أَصْبَحْنَا وَبِكَ أَمْسَيْنَا', english: 'O Allah, by You we enter the morning and by You we enter the evening.'),
     DuaModel(id: 'evening', title: 'Evening Dua', arabic: 'اللَّهُمَّ بِكَ أَمْسَيْنَا وَبِكَ نَحْيَا', english: 'O Allah, by You we enter the evening and by You we live.'),
+
+    // 😴 Sleep
     DuaModel(id: 'sleep', title: 'Before Sleep', arabic: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا', english: 'In Your name O Allah, I die and I live.'),
+    DuaModel(id: 'wakeup', title: 'After Waking Up', arabic: 'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا', english: 'All praise is for Allah who gave us life after causing us to die.'),
+
+    // 🍽 Food
+    DuaModel(id: 'before_eating', title: 'Before Eating', arabic: 'بِسْمِ اللَّهِ', english: 'In the name of Allah.'),
+    DuaModel(id: 'after_eating', title: 'After Eating', arabic: 'الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا', english: 'All praise is for Allah who fed us and gave us drink.'),
+
+    // 🏠 Home
+    DuaModel(id: 'enter_home', title: 'Entering Home', arabic: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ الْمَوْلِجِ وَخَيْرَ الْمَخْرَجِ', english: 'O Allah, I ask You for the best entrance and the best exit.'),
+    DuaModel(id: 'leave_home', title: 'Leaving Home', arabic: 'بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ', english: 'In the name of Allah, I place my trust in Allah.'),
+
+    // 🕌 Masjid
+    DuaModel(id: 'enter_masjid', title: 'Entering Masjid', arabic: 'اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ', english: 'O Allah, open for me the doors of Your mercy.'),
+    DuaModel(id: 'leave_masjid', title: 'Leaving Masjid', arabic: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ', english: 'O Allah, I ask You from Your فضل (bounty).'),
+
+    // ✈️ Travel
+    DuaModel(id: 'travel', title: 'Travel Dua', arabic: 'سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ', english: 'Glory is to Him who has subjected this to us, and we could not have done it ourselves.'),
+
+    // 🤲 Core Duas
     DuaModel(id: 'forgiveness', title: 'Seeking Forgiveness', arabic: 'أَسْتَغْفِرُ اللَّهَ', english: 'I seek forgiveness from Allah.'),
     DuaModel(id: 'protection', title: 'Protection', arabic: 'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ', english: 'I seek refuge in the perfect words of Allah.'),
     DuaModel(id: 'parents', title: 'Dua for Parents', arabic: 'رَّبِّ ارْحَمْهُمَا كَمَا رَبَّيَانِي صَغِيرًا', english: 'My Lord, have mercy upon them as they brought me up when I was small.'),
